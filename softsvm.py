@@ -27,30 +27,30 @@ def softsvm(l, trainX, trainy):
     # Convert trainy to a diagonal matrix for constraints
     y_diag = np.diag(trainy.flatten())
     
-    # Construct the matrices for the quadratic programming problem
+    # Construct the matrices
     H = np.block([
         [np.eye(d), np.zeros((d, m))],
         [np.zeros((m, d)), np.zeros((m, m))]
-    ]) * (2 * l)  # Regularization term
-    H = matrix(H) #maybe need to add a small epsilon if there is an error
+    ]) * (2 * l) 
+    H = matrix(H)
 
     u = np.concatenate([np.zeros(d), np.ones(m) / m])
     u = matrix(u)
 
-    # Construct A for the constraints
-    upper_block = np.hstack([y_diag @ trainX, np.eye(m)])  # y_diag * trainX and slack variables
-    lower_block = np.hstack([np.zeros((m, d)), np.eye(m)])  # 0 matrix and eye(m)
+    # Construct A
+    upper_block = np.hstack([y_diag @ trainX, np.eye(m)])
+    lower_block = np.hstack([np.zeros((m, d)), np.eye(m)])
     A = np.vstack([upper_block, lower_block])  # Combine both blocks
     A = matrix(A)
 
-    # Construct v for the constraints
+    # Construct v
     v = np.concatenate([np.ones(m), np.zeros(m)])  # [1...1] for upper block and [0...0] for lower block
     v = matrix(v)
 
-    # Solve the quadratic programming problem
+    # Solve the QP problem
     sol = solvers.qp(H, u, -A, -v)
 
-    # Extract w (linear predictor) from the solution
+    # Extract w
     solution = np.array(sol["x"])
     w = solution[:d]  # First d elements correspond to w
 
